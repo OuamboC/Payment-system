@@ -7,7 +7,10 @@ import com.stripe.model.CustomerCollection;
 import com.stripe.param.CustomerCreateParams;
 import com.stripe.param.CustomerListParams;
 import net.stripeIntegration.stripeIntegration.model.CustomerData;
+import net.stripeIntegration.stripeIntegration.util.StripeUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,6 +24,9 @@ import java.util.List;
 public class StripePaymentControllerAPI {
     @Value("${stripe.apikey}")
     String stripeKey;
+
+    @Autowired
+    StripeUtil stripeUtil;
     @RequestMapping("/createCustomer")
     public CustomerData index(@RequestBody CustomerData data) throws StripeException {
         Stripe.apiKey = stripeKey;
@@ -49,7 +55,25 @@ public class StripePaymentControllerAPI {
             allCustomer.add(customerData);
 
         }
-
         return allCustomer;
+    }
+
+    @RequestMapping("/deleteCustomer/{id}")
+    public String deleteCustomer(@PathVariable("id") String id) throws StripeException {
+        Stripe.apiKey = stripeKey;
+
+        Customer resource = Customer.retrieve(id);
+
+        Customer customer = resource.delete();
+        return "successfully deleted";
+    }
+
+    @RequestMapping("/getCustomer/{id}")
+    public CustomerData getCustomer(@PathVariable("id") String id) throws StripeException {
+
+        Stripe.apiKey = stripeKey;
+
+        CustomerData output = stripeUtil.getCustomer(id);
+        return output;
     }
 }
